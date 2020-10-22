@@ -38,14 +38,15 @@ def suggested_time(list_1, list_2, start_time, end_time, duration):
         curr_start_time = merged_slots[index][0]
         curr_end_time = merged_slots[index][1]
         if curr_time < curr_start_time:
-            time_available = merged_slots[index][0] - curr_time
-            if number_to_minutes(time_available) >= duration:
+            time_available = number_to_minutes(merged_slots[index][0]) - number_to_minutes(curr_time)
+            if time_available >= duration:
                 slot = f"{format_number_to_hour_min(curr_time)}-{format_number_to_hour_min(curr_start_time)}"
                 available_slots.append(slot)
         index += 1
         curr_time = curr_end_time
 
-    if curr_time < end_time and number_to_minutes(end_time-curr_time) >= duration:
+    time_available = number_to_minutes(end_time) - number_to_minutes(curr_time)
+    if curr_time < end_time and time_available >= duration:
         available_slots.append(f"{format_number_to_hour_min(curr_time)}-{format_number_to_hour_min(end_time)}")
     return available_slots
 
@@ -62,10 +63,11 @@ def get_end_time(meeting_schedule):
     return time_to_int(end_time)
 
 def number_to_minutes(number):
-    return number*60/100
+    number = str(number)
+    minutes = number[-2:]
+    hours = number[:-2] or 0
+    return int(hours)*60 + int(minutes)
 
 def format_number_to_hour_min(number):
     number = str(number)
-    if len(number) == 4:
-        return f"{number[0:2]}:{number[-2:]}"
-    return f"0{number[0]}:{number[-2:]}"
+    return f"{number[:-2].rjust(2, '0')}:{number[-2:].rjust(2, '0')}"
