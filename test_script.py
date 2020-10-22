@@ -15,5 +15,50 @@ class TestSuggestedTime:
             "duration": 60,
         }
 
-    def test_sample(self, parameters):
-        assert suggested_time(**parameters) == []
+    def test_empty_schedule(self, parameters):
+        parameters["list_1"] = []
+        parameters["list_2"] = []
+        result = ["08:00-17:00"]
+        assert suggested_time(**parameters) == result
+
+    def test_one_user_single_meeting(self, parameters):
+        parameters["list_1"] = ["14:00-15:00"]
+        parameters["list_2"] = []
+        result = ["08:00-14:00", "15:00-17:00"]
+        assert suggested_time(**parameters) == result
+
+    def test_both_user_same_meeting(self, parameters):
+        parameters["list_1"] = ["14:00-15:00"]
+        parameters["list_2"] = ["14:00-15:00"]
+        result = ["08:00-14:00", "15:00-17:00"]
+        assert suggested_time(**parameters) == result
+
+    def test_one_user_multiple_meetings(self, parameters):
+        parameters["list_1"] = ["14:00-15:00", "16:00-17:00"]
+        parameters["list_2"] = []
+        result = ["08:00-14:00", "15:00-16:00"]
+        assert suggested_time(**parameters) == result
+
+    def test_both_user_multiple_meetings(self, parameters):
+        parameters["list_1"] = ["10:30-11:30", "14:00-15:00"]
+        parameters["list_2"] = ["09:00-11:00", "15:30-16:00"]
+        result = ["08:00-09:00", "11:30-14:00", "16:00-17:00"]
+        assert suggested_time(**parameters) == result
+
+    def test_meeting_at_start_of_day(self, parameters):
+        parameters["list_1"] = ["05:00-09:30"]
+        parameters["list_2"] = []
+        result = ["09:30-17:00"]
+        assert suggested_time(**parameters) == result
+
+    def test_meeting_at_end_of_day(self, parameters):
+        parameters["list_1"] = ["14:00-19:00"]
+        parameters["list_2"] = []
+        result = ["08:00-14:00"]
+        assert suggested_time(**parameters) == result
+
+    def test_smaller_duration_gap_ignored(self, parameters):
+        parameters["list_1"] = ["9:00-10:00", "10:05-11:00"]
+        parameters["list_2"] = []
+        result = ["08:00-09:00", "11:00-17:00"]
+        assert suggested_time(**parameters) == result
