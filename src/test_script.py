@@ -1,6 +1,6 @@
 import pytest
 
-from script import suggested_time
+from .script import suggested_time
 
 
 class TestSuggestedTime:
